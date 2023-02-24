@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}
+Form Page
+{% endblock %}
+{% block content %}
+<div id="app">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chem In
+                        {% raw %}
+                        {{ message }}
+                    </h5>
+                    <form class="needs-validation" novalidate="">
+                        <div class="base_form">
+                            <div class="col-md-3">
+                                <label for="databaseValidate" class="form-label">Select Database</label>
+                                <select class="form-select" id="databaseValidate" required="" v-model='database'
+                                    @input="change_1()">
+                                    <option selected="" value="">Choose...</option>
+                                    <option>ChEMBL</option>
+                                    <option>CoconutDB</option>
+                                    <option>uniportkb</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid database.
+                                </div>
+                            </div>
+                            <div class='col-md-3' id="step_2" style="display: none;">
+                                <label for="entityValidate" class="form-label">Select Entities</label>
+                                <select class="form-select" id="entityValidate" required="" v-model='entity'
+                                    @input="change_2()">
+                                    <option selected="" value="">Choose...</option>
+                                    <option>Protein</option>
+                                    <option>Drug</option>
+                                    <option>Apple</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid entity.
+                                </div>
+                            </div>
+                            <div class='col-md-3' id="step_3" style="display: none;">
+                                <label for="searchusingValidate" class="form-label">Search Using</label>
+                                <select class="form-select" id="searchusingValidate" required="" v-model='searchUsing'>
+                                    <option selected="" value="">Choose...</option>
+                                    <option>Uniport ID</option>
+                                    <option>SMILES</option>
+                                    <option>Sequence</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid method for search.
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button style="visibility: hidden;"></button>
+                                <button type="reset" @click="reset()" class="btn btn-secondary">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div id="uniport_ID_dialog" class="card-body" style="display:none;">
+                    <form class="needs-validation" novalidate="" action="/uniport">
+                        <p class='card-title'>Search using the Uniport ID</p>
+                        <div class="col-md-3">
+                            <label for="uniportidValidate" class="form-label">Enter the Uniport ID</label>
+                            <input type="text" class="form-input" id="uniportidValidate" required=""
+                                v-model='uniport_id' name="uniport_id" @input="">
+                            <div class="invalid-feedback">
+                                Please select a valid ID.
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button style="visibility: hidden;"></button>
+                            <button type="reset" @click="reset()" class="btn btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="smiles_dialog" class="card-body" style="display:none;">
+                    <form class="needs-validation" novalidate="">
+                        <h5 class='card-header'>Search using SMILES</h5>
+                        <div class="card-title">
+                            <label for="upload_smileValidate" class="form-label">Upload Simile
+                                Sequence</label>
+                            <input type="file" class="form-input" id="upload_smileValidate" required=""
+                                v-model='uniport_id' @input="">
+                            <div class="invalid-feedback">
+                                Please select a valid ID.
+                            </div>
+                        </div>
+                        <div class="card-title">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="raw_smileValidate" class="form-label">Enter or Paste Raw
+                                        Sequence &nbsp;</label>
+                                    <textarea class="form-input" id="raw_smileValidate" required="" v-model='smiles_id'
+                                        @input=""></textarea>
+                                    <div class="invalid-feedback">
+                                        Please select a valid ID.
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <p class="btn btn-outline-primary bi-plus-circle-fill" @click="addSmiletoDisplay()">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="smiles_list_display"
+                            class="p-3 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">
+                            <table class="table table-hover table-borderless">
+                                <thead>
+                                    <th>SMILES</th>
+                                    <th>Actions</th>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in smiles_array">
+                                        <td>{{ item }}</td>
+                                        <td>
+                                            <p class="btn btn-outline-danger" @click="removeSmilefromDisplay(item)">
+                                                Delete
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="">
+                            <label for="raw_smileValidate" class="form-label">Enter Similarity Percentage
+                                &nbsp;</label>
+                            <input type="number" class="form-input" id="raw_smileValidate" required=""
+                                v-model='uniport_id' @input="">
+                            <div class="invalid-feedback">
+                                Please select a valid ID.
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Search Similar Compounds</button>
+                            <button style="visibility: hidden;"></button>
+                            <button type="reset" @click="reset()" class="btn btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="sequence_dialog" class="card-body" style="display:none;">
+                    <p class='card-title'>Search using the Sequence</p>
+                    <div class="col-md-3">
+                        <label for="uniportidValidate" class="form-label">Enter or Paste the raw
+                            sequence</label>
+                        <input type="text" class="form-input" id="uniportidValidate" required="" v-model='uniport_id'
+                            @input="">
+                        <div class="invalid-feedback">
+                            Please select a valid ID.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/vue/form1.js"></script>
+{% endraw %}
+{% endblock %}
